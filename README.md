@@ -32,7 +32,7 @@ homelab-traefik/
 - DNS resolution for `*.mol.lan` domains (including `lb.mol.lan`)
 - SSL certificates mounted at `/etc/ssl/private`
 
-## 🔧 Deployment Instructions
+## Deployment Instructions
 
 ### 1. Clone and Setup
 
