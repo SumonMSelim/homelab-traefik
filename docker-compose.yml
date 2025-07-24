@@ -1,0 +1,16 @@
+services:
+  traefik:
+    image: traefik:v3.1.1
+    container_name: traefik
+    restart: unless-stopped
+    command:
+      - "--configFile=/traefik.yml"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./acme.json:/acme.json:rw
+      - ./dynamic:/dynamic:ro
+      - ./traefik.yml:/traefik.yml:ro
+      - /etc/ssl/private:/etc/traefik/certs:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
