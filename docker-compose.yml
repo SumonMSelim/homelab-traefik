@@ -12,7 +12,8 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./acme.json:/acme.json:rw
+      - ./acme-LetsEncrypt.json:/acme-LetsEncrypt.json:rw
+      - ./acme-StepCA.json:/acme-StepCA.json:rw
       - ./dynamic:/dynamic:ro
       - ./logs:/logs:rw
       - ./traefik.yml:/traefik.yml:ro
