@@ -25,7 +25,7 @@ providers:
 certificatesResolvers:
   stepCA:
     acme:
-      caServer: "https://ca.mol.lan/acme/acme-directory"
+      caServer: "https://ca.mol.lan/acme/acme/directory"
       email: "sumon@mol.la"
       storage: "acme.json"
       keyType: EC256
