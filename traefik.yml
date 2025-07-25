@@ -32,7 +32,7 @@ api:
 
 log:
   level: INFO
-  filePath: /traefik.log
+  filePath: /logs/traefik.log
 
 providers:
   file:

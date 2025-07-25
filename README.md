@@ -22,7 +22,7 @@ homelab-traefik/
 ├── docker-compose.yml     # Traefik container configuration
 ├── Dockerfile             # Custom Traefik image with internal CA
 ├── traefik.yml            # Main Traefik configuration with centralized redirects
-├── traefik.log            # Traefik log file (auto-generated, excluded from git)
+├── logs/                  # Traefik log directory (excluded from git)
 ├── acme.json              # ACME certificate storage (auto-generated)
 ├── dynamic/               # Modular dynamic routing configurations
 │   ├── security.yml       # Centralized security headers middleware
@@ -50,12 +50,15 @@ git clone https://github.com/SumonMSelim/homelab-traefik.git
 cd homelab-traefik
 ```
 
-### 2. Configure ACME Storage
+### 2. Configure ACME Storage and Logs
 
 ```bash
 # Create acme.json with correct permissions
 touch acme.json
 chmod 600 acme.json
+
+# Create logs directory
+mkdir -p logs
 ```
 
 ### 3. Configure Root CA Certificate
@@ -133,7 +136,7 @@ Changes are automatically detected and applied thanks to `watch: true`.
 docker compose logs traefik | grep -i acme
 
 # Check ACME logs in log file
-grep -i acme traefik.log
+grep -i acme logs/traefik.log
 ```
 
 **Routing Problems**
@@ -142,7 +145,7 @@ grep -i acme traefik.log
 docker compose config
 
 # Check routing logs
-grep -i router traefik.log
+grep -i router logs/traefik.log
 ```
 
 **DNS Resolution**
@@ -165,7 +168,7 @@ docker compose exec traefik ls -la /dynamic/
 
 # View logs (file-based logging)
 docker compose logs traefik
-tail -f traefik.log
+tail -f logs/traefik.log
 
 # View ACME certificates
 docker compose exec traefik cat /acme.json | jq
@@ -184,7 +187,7 @@ curl -I https://lb.mol.lan
 
 - Default domain: `mol.lan`
 - Certificate storage: `acme.json` (ensure proper permissions)
-- Log file: `traefik.log` (file-based logging enabled)
+- Log directory: `logs/` (file-based logging enabled, supports rotation)
 - Dynamic config directory: `./dynamic/` (modular configuration files)
 - Security middleware: Centralized in `security.yml` for reusability
 - Traefik version: `latest` (automatically updated)
