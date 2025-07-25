@@ -57,15 +57,15 @@ Ensure your host has SSL certificates available at `/etc/ssl/private` or update 
 
 ```bash
 # Start Traefik
-docker-compose up -d
+docker compose up -d
 
 # View logs
-docker-compose logs -f traefik
+docker compose logs -f traefik
 ```
 
 ### 5. Access Dashboard
 
-Visit `https://traefik.mol.lan` to access the authenticated Traefik dashboard.
+Visit `https://lb.mol.lan` to access the authenticated Traefik dashboard.
 
 ## Adding New Services
 
@@ -99,13 +99,13 @@ Changes are automatically detected and applied thanks to `watch: true`.
 **Certificate Issues**
 ```bash
 # Check ACME logs
-docker-compose logs traefik | grep -i acme
+docker compose logs traefik | grep -i acme
 ```
 
 **Routing Problems**
 ```bash
 # Validate configuration
-docker-compose config
+docker compose config
 ```
 
 **DNS Resolution**
@@ -118,16 +118,16 @@ nslookup one.mol.lan
 
 ```bash
 # Restart Traefik
-docker-compose restart traefik
+docker compose restart traefik
 
 # View configuration
-docker-compose exec traefik cat /traefik.yml
+docker compose exec traefik cat /traefik.yml
 
 # Check dynamic config
-docker-compose exec traefik ls -la /dynamic/
+docker compose exec traefik ls -la /dynamic/
 
 # View ACME certificates
-docker-compose exec traefik cat /acme.json | jq
+docker compose exec traefik cat /acme.json | jq
 ```
 
 ## Resources
