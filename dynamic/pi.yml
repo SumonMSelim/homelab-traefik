@@ -14,4 +14,4 @@ http:
     pi-service:
       loadBalancer:
         servers:
-          - url: "http://192.168.178.232"
+          - url: "http://192.168.178.232:80"
