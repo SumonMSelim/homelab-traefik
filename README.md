@@ -23,11 +23,13 @@ homelab-traefik/
 ├── Dockerfile             # Custom Traefik image with internal CA
 ├── traefik.yml            # Main Traefik configuration with centralized redirects
 ├── logs/                  # Traefik log directory (excluded from git)
-├── acme.json              # ACME certificate storage (auto-generated)
+├── acme-LetsEncrypt.json  # ACME public certificate storage (auto-generated)
+├── acme-StepCA.json       # ACME local certificate storage (auto-generated)
 ├── dynamic/               # Modular dynamic routing configurations
 │   ├── security.yml       # Centralized security headers middleware
-│   ├── lb.yml             # Dashboard routing with authentication
-│   └── one.yml            # Service routing configuration
+│   ├── proxy.yml
+│   └── one.yml
+|   └── ...
 ├── root_ca.crt            # Step CA root certificate (excluded from git)
 ├── .gitignore             # Git ignore rules
 ├── LICENSE                # MIT License
@@ -39,7 +41,7 @@ homelab-traefik/
 - Docker and Docker Compose installed
 - Step CA server running at `ca.mol.lan`
 - Step CA root certificate (`root_ca.crt`) for Docker image build
-- DNS resolution for `*.mol.lan` domains (including `lb.mol.lan`)
+- DNS resolution for `*.mol.lan` domains (including `proxy.mol.lan`)
 
 ## Deployment Instructions
 
@@ -53,9 +55,12 @@ cd homelab-traefik
 ### 2. Configure ACME Storage and Logs
 
 ```bash
-# Create acme.json with correct permissions
-touch acme.json
-chmod 600 acme.json
+# Create acme files with correct permissions
+touch acme-LetsEncrypt.json
+chmod 600 acme-LetsEncrypt.json
+
+touch acme-StepCA.json
+chmod 600 acme-StepCA.json
 
 # Create logs directory
 mkdir -p logs
@@ -77,17 +82,12 @@ cp /path/to/your/step-ca/root_ca.crt ./root_ca.crt
 docker compose up -d --build
 
 # View logs
-docker compose logs -f traefik
+tail -f logs/traefik
 ```
 
 ### 5. Access Dashboard
 
-Visit `https://lb.mol.lan` to access the authenticated Traefik dashboard.
-
-## Current Services Configured
-
-- **Dashboard** (`lb.mol.lan`) - Traefik dashboard with Basic Auth protection
-- **Service One** (`one.mol.lan`) - Proxies to `https://192.168.178.110:8006` (e.g., Proxmox VE)
+Visit `https://proxy.mol.lan` to access the authenticated Traefik dashboard.
 
 ## Configuration Structure
 
@@ -95,9 +95,6 @@ Visit `https://lb.mol.lan` to access the authenticated Traefik dashboard.
 The project uses centralized security middleware defined in `dynamic/security.yml`:
 - **`security-headers-internal`**: For internal homelab services
 - **`security-headers-public`**: For public-facing services (includes HSTS)
-
-### Dashboard Authentication
-Dashboard access is protected via Basic Auth in `dynamic/lb.yml` and accessible at `https://lb.mol.lan`.
 
 ## Adding New Services
 
@@ -170,11 +167,9 @@ docker compose exec traefik ls -la /dynamic/
 docker compose logs traefik
 tail -f logs/traefik.log
 
-# View ACME certificates
-docker compose exec traefik cat /acme.json | jq
 
 # Test security headers
-curl -I https://lb.mol.lan
+curl -I https://proxy.mol.lan
 ```
 
 ## Resources
@@ -186,7 +181,6 @@ curl -I https://lb.mol.lan
 ## Notes
 
 - Default domain: `mol.lan`
-- Certificate storage: `acme.json` (ensure proper permissions)
 - Log directory: `logs/` (file-based logging enabled, supports rotation)
 - Dynamic config directory: `./dynamic/` (modular configuration files)
 - Security middleware: Centralized in `security.yml` for reusability

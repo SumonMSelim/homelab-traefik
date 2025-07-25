@@ -1,5 +1,5 @@
 # Traefik Certificate Storage
-acme.json
+acme-*.json
 *.crt
 *.key
 *.pem

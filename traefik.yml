@@ -45,7 +45,7 @@ certificatesResolvers:
     acme:
       caServer: "https://ca.mol.lan/acme/acme/directory"
       email: "sumon@mol.la"
-      storage: "acme-StepCA.json"
+      storage: "/acme-StepCA.json"
       keyType: EC256
       tlsChallenge: {}
 
@@ -53,7 +53,7 @@ certificatesResolvers:
   letsEncrypt:
     acme:
       email: "smseleem@gmail.com"
-      storage: "acme-LetsEncrypt.json"
+      storage: "/acme-LetsEncrypt.json"
       caServer: "https://acme-v02.api.letsencrypt.org/directory"
       httpChallenge:
         entryPoint: web
