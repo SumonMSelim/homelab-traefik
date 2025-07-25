@@ -38,13 +38,22 @@ providers:
   file:
     directory: /dynamic
     watch: true
-
+    
 certificatesResolvers:
+  # for local domains like mol.lan, mol.local, etc.
   stepCA:
     acme:
       caServer: "https://ca.mol.lan/acme/acme/directory"
       email: "sumon@mol.la"
       storage: "acme.json"
       keyType: EC256
+      tlsChallenge: {}
+
+  # for public domains like mol.la, sumonselim.com etc.
+  letsEncrypt:
+    acme:
+      email: "smseleem@gmail.com"
+      storage: "/acme.json"
+      caServer: "https://acme-v02.api.letsencrypt.org/directory"
       httpChallenge:
         entryPoint: web
