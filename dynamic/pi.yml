@@ -1,0 +1,17 @@
+http:
+  routers:
+    pi-router:
+      rule: "Host(`pi.mol.lan`)"
+      entryPoints:
+        - websecure
+      service: pi-service
+      middlewares:
+        - security-headers-internal
+      tls:
+        certResolver: stepCA
+
+  services:
+    pi-service:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.178.232"
