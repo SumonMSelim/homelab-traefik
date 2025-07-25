@@ -13,6 +13,7 @@ acme.json
 *.log
 logs/
 log/
+traefik.log
 
 # Temporary files
 *.tmp

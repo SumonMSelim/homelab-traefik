@@ -6,11 +6,13 @@ A Docker-based Traefik v3 reverse proxy setup for homelab environments with auto
 
 This project provides a complete Traefik reverse proxy solution for homelab environments featuring:
 
-- **Automatic HTTPS**: All HTTP traffic redirected to HTTPS
+- **Automatic HTTPS**: All HTTP traffic redirected to HTTPS with centralized redirect middleware
 - **Custom CA Integration**: Uses Step CA (`ca.mol.lan`) for certificate management
 - **Custom Docker Image**: Built with internal CA certificate trust
-- **File-based Configuration**: Dynamic routing rules via YAML files
-- **Dashboard Access**: Traefik dashboard for monitoring and configuration
+- **Centralized Security**: Reusable security header middlewares for internal and public services
+- **Dashboard Authentication**: Protected Traefik dashboard with Basic Auth
+- **File-based Configuration**: Modular dynamic routing rules via YAML files
+- **Structured Logging**: File-based logging for better monitoring
 - **Hot Reload**: Configuration changes applied without restart
 
 ## Project Structure
@@ -19,11 +21,13 @@ This project provides a complete Traefik reverse proxy solution for homelab envi
 homelab-traefik/
 ├── docker-compose.yml     # Traefik container configuration
 ├── Dockerfile             # Custom Traefik image with internal CA
-├── traefik.yml            # Main Traefik configuration
+├── traefik.yml            # Main Traefik configuration with centralized redirects
+├── traefik.log            # Traefik log file (auto-generated, excluded from git)
 ├── acme.json              # ACME certificate storage (auto-generated)
-├── dynamic/               # Dynamic routing configurations
-│   ├── lb.yml
-│   └── one.yml
+├── dynamic/               # Modular dynamic routing configurations
+│   ├── security.yml       # Centralized security headers middleware
+│   ├── lb.yml             # Dashboard routing with authentication
+│   └── one.yml            # Service routing configuration
 ├── root_ca.crt            # Step CA root certificate (excluded from git)
 ├── .gitignore             # Git ignore rules
 ├── LICENSE                # MIT License
@@ -36,7 +40,6 @@ homelab-traefik/
 - Step CA server running at `ca.mol.lan`
 - Step CA root certificate (`root_ca.crt`) for Docker image build
 - DNS resolution for `*.mol.lan` domains (including `lb.mol.lan`)
-- SSL certificates mounted at `/etc/ssl/private`
 
 ## Deployment Instructions
 
@@ -64,8 +67,6 @@ Copy your Step CA root certificate as `root_ca.crt` to the project root director
 cp /path/to/your/step-ca/root_ca.crt ./root_ca.crt
 ```
 
-Ensure your host has SSL certificates available at `/etc/ssl/private` or update the volume mount in `docker-compose.yml`.
-
 ### 4. Build and Deploy Traefik
 
 ```bash
@@ -80,9 +81,24 @@ docker compose logs -f traefik
 
 Visit `https://lb.mol.lan` to access the authenticated Traefik dashboard.
 
+## Current Services Configured
+
+- **Dashboard** (`lb.mol.lan`) - Traefik dashboard with Basic Auth protection
+- **Service One** (`one.mol.lan`) - Proxies to `https://192.168.178.110:8006` (e.g., Proxmox VE)
+
+## Configuration Structure
+
+### Centralized Security Headers
+The project uses centralized security middleware defined in `dynamic/security.yml`:
+- **`security-headers-internal`**: For internal homelab services
+- **`security-headers-public`**: For public-facing services (includes HSTS)
+
+### Dashboard Authentication
+Dashboard access is protected via Basic Auth in `dynamic/lb.yml` and accessible at `https://lb.mol.lan`.
+
 ## Adding New Services
 
-Create a new YAML file in the `dynamic/` directory:
+Create a new YAML file in the `dynamic/` directory, utilizing the centralized security middleware:
 
 ```yaml
 # dynamic/myservice.yml
@@ -93,6 +109,8 @@ http:
       entryPoints:
         - websecure
       service: myservice-service
+      middlewares:
+        - security-headers-internal  # Use centralized security headers
       tls:
         certResolver: stepCA
 
@@ -111,14 +129,20 @@ Changes are automatically detected and applied thanks to `watch: true`.
 
 **Certificate Issues**
 ```bash
-# Check ACME logs
+# Check ACME logs in container logs
 docker compose logs traefik | grep -i acme
+
+# Check ACME logs in log file
+grep -i acme traefik.log
 ```
 
 **Routing Problems**
 ```bash
 # Validate configuration
 docker compose config
+
+# Check routing logs
+grep -i router traefik.log
 ```
 
 **DNS Resolution**
@@ -136,11 +160,18 @@ docker compose restart traefik
 # View configuration
 docker compose exec traefik cat /traefik.yml
 
-# Check dynamic config
+# Check dynamic config files
 docker compose exec traefik ls -la /dynamic/
+
+# View logs (file-based logging)
+docker compose logs traefik
+tail -f traefik.log
 
 # View ACME certificates
 docker compose exec traefik cat /acme.json | jq
+
+# Test security headers
+curl -I https://lb.mol.lan
 ```
 
 ## Resources
@@ -153,7 +184,9 @@ docker compose exec traefik cat /acme.json | jq
 
 - Default domain: `mol.lan`
 - Certificate storage: `acme.json` (ensure proper permissions)
-- Dynamic config directory: `./dynamic/`
+- Log file: `traefik.log` (file-based logging enabled)
+- Dynamic config directory: `./dynamic/` (modular configuration files)
+- Security middleware: Centralized in `security.yml` for reusability
 - Traefik version: `latest` (automatically updated)
 
 ## Licensing
