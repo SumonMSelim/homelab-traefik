@@ -46,3 +46,5 @@ certificatesResolvers:
       email: "sumon@mol.la"
       storage: "acme.json"
       keyType: EC256
+      httpChallenge:
+        entryPoint: web
