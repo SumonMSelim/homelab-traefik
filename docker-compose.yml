@@ -1,6 +1,9 @@
 services:
   traefik:
-    image: traefik:v3.1.1
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: traefik:latest
     container_name: traefik
     restart: unless-stopped
     command:

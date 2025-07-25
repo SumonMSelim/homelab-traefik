@@ -1,6 +1,6 @@
 # Homelab Traefik Reverse Proxy
 
-A Docker-based Traefik v3 reverse proxy setup for homelab environments with automatic HTTPS using self-hosted Step CA for certificate management.
+A Docker-based Traefik v3 reverse proxy setup for homelab environments with automatic HTTPS using self-hosted Step CA for certificate management. Uses a custom Docker image with internal CA trust.
 
 ## Project Overview
 
@@ -8,6 +8,7 @@ This project provides a complete Traefik reverse proxy solution for homelab envi
 
 - **Automatic HTTPS**: All HTTP traffic redirected to HTTPS
 - **Custom CA Integration**: Uses Step CA (`ca.mol.lan`) for certificate management
+- **Custom Docker Image**: Built with internal CA certificate trust
 - **File-based Configuration**: Dynamic routing rules via YAML files
 - **Dashboard Access**: Traefik dashboard for monitoring and configuration
 - **Hot Reload**: Configuration changes applied without restart
@@ -17,11 +18,15 @@ This project provides a complete Traefik reverse proxy solution for homelab envi
 ```
 homelab-traefik/
 ├── docker-compose.yml     # Traefik container configuration
+├── Dockerfile             # Custom Traefik image with internal CA
 ├── traefik.yml            # Main Traefik configuration
 ├── acme.json              # ACME certificate storage (auto-generated)
 ├── dynamic/               # Dynamic routing configurations
 │   ├── lb.yml
 │   └── one.yml
+├── root_ca.crt            # Step CA root certificate (excluded from git)
+├── .gitignore             # Git ignore rules
+├── LICENSE                # MIT License
 └── README.md
 ```
 
@@ -29,6 +34,7 @@ homelab-traefik/
 
 - Docker and Docker Compose installed
 - Step CA server running at `ca.mol.lan`
+- Step CA root certificate (`root_ca.crt`) for Docker image build
 - DNS resolution for `*.mol.lan` domains (including `lb.mol.lan`)
 - SSL certificates mounted at `/etc/ssl/private`
 
@@ -49,15 +55,22 @@ touch acme.json
 chmod 600 acme.json
 ```
 
-### 3. Verify SSL Certificate Mount
+### 3. Configure Root CA Certificate
+
+Copy your Step CA root certificate as `root_ca.crt` to the project root directory. This will be built into the custom Traefik image to trust your internal CA.
+
+```bash
+# Copy your Step CA root certificate
+cp /path/to/your/step-ca/root_ca.crt ./root_ca.crt
+```
 
 Ensure your host has SSL certificates available at `/etc/ssl/private` or update the volume mount in `docker-compose.yml`.
 
-### 4. Deploy Traefik
+### 4. Build and Deploy Traefik
 
 ```bash
-# Start Traefik
-docker compose up -d
+# Build custom image and start Traefik
+docker compose up -d --build
 
 # View logs
 docker compose logs -f traefik
@@ -141,7 +154,7 @@ docker compose exec traefik cat /acme.json | jq
 - Default domain: `mol.lan`
 - Certificate storage: `acme.json` (ensure proper permissions)
 - Dynamic config directory: `./dynamic/`
-- Traefik version: v3.1.1
+- Traefik version: `latest` (automatically updated)
 
 ## Licensing
 
