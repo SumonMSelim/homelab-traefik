@@ -15,8 +15,3 @@ http:
       loadBalancer:
         servers:
           - url: "http://192.168.178.232:80"
-        serversTransport: insecure-backend
-
-  serversTransports:
-    insecure-backend:
-      insecureSkipVerify: true
