@@ -1,0 +1,45 @@
+http:
+  routers:
+    authentik-internal-router:
+      rule: "Host(`auth.mol.lan`)"
+      entryPoints:
+        - websecure
+      service: authentik-service
+      middlewares:
+        - security-headers-internal
+      tls:
+        certResolver: stepCA
+    authentik-public-router:
+      rule: "Host(`auth.mol.la`)"
+      entryPoints:
+        - websecure
+      service: authentik-service
+      middlewares:
+        - security-headers-public
+        - rate-limit
+      tls:
+        certResolver: letsEncrypt
+    authentik-outpost-router:
+      rule: "Host(`auth.mol.la`) && PathPrefix(`/outpost.goauthentik.io/`)"
+      entryPoints:
+        - websecure
+      service: authentik-outpost-service
+      middlewares:
+        - security-headers-public
+        - rate-limit
+      tls:
+        certResolver: letsEncrypt
+  services:
+    authentik-service:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.178.252:9000"
+    authentik-outpost-service:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.178.252:9443"
+  middlewares:
+    rate-limit:
+      rateLimit:
+        average: 100
+        burst: 50
