@@ -1,0 +1,16 @@
+http:
+  routers:
+    vault:
+      rule: Host(`vault.mol.la`)
+      entryPoints:
+        - websecure
+      tls:
+        certResolver: letsEncrypt
+      service: vault
+
+  services:
+    vault:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.178.113:8200"
+        passHostHeader: true
